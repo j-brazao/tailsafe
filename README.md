@@ -103,3 +103,7 @@ inactive ufw doesn't filter traffic, so SSH is reachable anyway.
 ```sh
 python3 -m unittest discover -s tests -t .
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).
