@@ -1,0 +1,41 @@
+# tailsafe configuration — install as /etc/tailsafe/config.toml
+
+[ssh]
+port = 22
+
+[check]
+# Consecutive failed checks before SSH is opened (avoids reacting to blips).
+failure_threshold = 3
+# Consecutive successful checks before the original firewall is restored.
+recovery_threshold = 1
+# Seconds between checks in daemon mode (ignored by `tailsafe check`).
+interval = 30
+
+[tailscale]
+binary = "tailscale"
+timeout = 10
+# Treat "backend running but node offline" as disconnected.
+require_online = true
+
+[firewall]
+type = "ufw"            # currently supported: ufw
+# binary = "ufw"
+# "append" (default) or "prepend" — prepend if you have deny rules for the SSH
+# port that would otherwise shadow the fallback rules.
+# position = "append"
+
+# Where SSH may come from while Tailscale is down. Names tag the firewall
+# rules (letters, digits, '-' and '_').
+
+[[sources]]
+name = "office"
+type = "cidr"
+value = "203.0.113.0/24"
+
+[[sources]]
+name = "home"
+type = "dns"            # resolved on every check; rules follow IP changes
+value = "home.example.com"
+family = "ipv4"         # any | ipv4 | ipv6
+
+# state_file = "/var/lib/tailsafe/state.json"

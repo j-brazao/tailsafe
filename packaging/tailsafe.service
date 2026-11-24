@@ -1,0 +1,14 @@
+[Unit]
+Description=tailsafe - open SSH fallback when Tailscale is down
+After=network-online.target tailscaled.service ufw.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/tailsafe -c /etc/tailsafe/config.toml daemon
+Restart=always
+RestartSec=10
+StateDirectory=tailsafe
+
+[Install]
+WantedBy=multi-user.target

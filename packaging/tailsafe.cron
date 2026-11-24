@@ -1,0 +1,4 @@
+# Install as /etc/cron.d/tailsafe (use either this or the systemd service, not both).
+# With check.failure_threshold = 3 SSH opens after ~3 minutes of Tailscale being down.
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+* * * * * root /usr/local/bin/tailsafe -c /etc/tailsafe/config.toml check >> /var/log/tailsafe.log 2>&1

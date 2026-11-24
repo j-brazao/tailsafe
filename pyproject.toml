@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tailsafe"
+version = "0.1.0"
+description = "Open inbound SSH in the host firewall when Tailscale is down, and restore it when Tailscale is back"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+tailsafe = "tailsafe.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["tailsafe*"]
