@@ -131,6 +131,34 @@ class RunOnceTest(unittest.TestCase):
         self.assertEqual(run_once(cfg, state, FakeChecker(True), fw), Action.RESTORE)
         self.assertEqual(fw.rules, [])
 
+    def test_failed_dns_rule_addition_keeps_old_fallback_until_retry(self):
+        old = managed_rule("198.51.100.7", 22, "home")
+        new = managed_rule("198.51.100.8", 22, "home")
+
+        class FailingAddFirewall(FakeFirewall):
+            fail_add = True
+
+            def add_rule(self, rule):
+                if self.fail_add and rule == new:
+                    raise RuntimeError("simulated firewall add failure")
+                super().add_rule(rule)
+
+        fw = FailingAddFirewall([old])
+        state = State(consecutive_failures=1, last_connected=False, opened_at=1)
+        with self.assertRaisesRegex(RuntimeError, "firewall operation"):
+            _run_once(config(), state, FakeChecker(False), fw, FakeResolver(["198.51.100.8"]))
+        self.assertIn(old, fw.rules)
+        self.assertNotIn(new, fw.rules)
+        self.assertIn(managed_rule("203.0.113.0/24", 22, "office"), fw.rules)
+
+        fw.fail_add = False
+        self.assertEqual(
+            _run_once(config(), state, FakeChecker(False), fw, FakeResolver(["198.51.100.8"])),
+            Action.OPEN,
+        )
+        self.assertIn(new, fw.rules)
+        self.assertNotIn(old, fw.rules)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -91,6 +91,12 @@ def apply(firewall: Firewall, plan: Plan) -> None:
         except Exception as exc:  # keep going so other sources still get access
             log.error("failed to add %s: %s", rule, exc)
             errors.append(exc)
+    if errors:
+        # Keep every existing fallback rule until all replacements are in place.
+        # Successful additions remain, and the next check will retry the rest.
+        if plan.delete:
+            log.warning("skipping %d rule deletion(s) after failed addition", len(plan.delete))
+        raise RuntimeError(f"{len(errors)} firewall operation(s) failed")
     for rule in plan.delete:
         log.info("removing ssh rule for %s (%s)", rule.source, rule.tag)
         try:
